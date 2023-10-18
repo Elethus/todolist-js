@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TodoList</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <script src="./app.js" type="module" defer></script>
+  <style>
+    .hide-completed .todo.is-completed {
+      display: none !important;
+    }
+
+    .hide-todo .todo:not(.is-completed) {
+      display: none !important;
+    }
+
+    .is-completed label {
+      text-decoration: line-through;
+      opacity: 50%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <template id="loader-layout">
+    <div class="container pt-4" id="loader">
+      <div class="alert alert-primary d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+        <span>Loading...</span>
+      </div>
+  </template>
+
+  <template id="todolist-layout">
+    <section class="container pt-5" id="todolist">
+      <!-- Add bar -->
+      <form class="input-group d-flex pb-4">
+        <input required class="form-control" type="text" placeholder="Add task..." name="title"
+          data-com.bitwarden.browser.user-edited="yes">
+        <button class="btn btn-primary">Add</button>
+      </form>
+
+      <main>
+        <!-- Button bar -->
+        <div class="btn-toolbar justify-content-between">
+          <div class="btn-group mb-4 " role="group">
+            <button type="button" class=" btn btn-filter btn-sm btn-outline-primary active"
+              data-filter="all">All</button>
+            <button type="button" class=" btn btn-filter btn-sm btn-outline-primary"
+              data-filter="todo">To do</button>
+            <button type="button" class=" btn btn-filter btn-sm btn-outline-primary"
+              data-filter="done">Completed</button>
+          </div>
+          <div class="btn-group mb-4" role="group">
+            <button type="button" class=" btn btn-clear btn-danger btn-sm" data-filter="clear">Clear
+              completed</button>
+          </div>
+        </div>
+
+        <!-- Todolist -->
+        <ul class="list-group">
+        </ul>
+
+      </main>
+
+    </section>
+  </template>
+
+  <template id="todolist-item">
+    <li class="todo list-group-item d-flex align-items-center">
+      <input class="form-check-input flex-shrink-0 mt-0" type="checkbox">
+      <label class="form-check-label ms-2 flex-grow-1"></label>
+
+      <form class="ms-2 flex-grow-1" hidden>
+        <input type="text" class="form-control form-control-sm" name="title">
+      </form>
+
+      <div class="btn-group ms-2">
+        <button class="todo-edit btn btn-primary btn-sm">
+          <i class="bi-pencil-square"></i>
+        </button>
+        <button class="todo-remove btn btn-danger btn-sm">
+          <i class="bi-trash"></i>
+        </button>
+      </div>
+    </li>
+  </template>
+
+</body>
+
+</html>
