@@ -44,7 +44,8 @@ class TodoListItem {
     label.setAttribute("for", `todo-${this.#id}`)
     label.innerText = this.#title
 
-    this.#element.querySelector(".todo-edit").addEventListener("click", (e) => {
+    const editBtn = this.#element.querySelector(".todo-edit")
+    editBtn.addEventListener("click", (e) => {
       e.preventDefault()
       this.edit(e)
     })
@@ -55,6 +56,24 @@ class TodoListItem {
     checkbox.addEventListener("change", (e) => {
       e.preventDefault()
       this.toggle()
+    })
+    const editForm = this.#element.querySelector("form")
+    editForm.addEventListener("submit", (e) => {
+      e.preventDefault()
+      const newTitle = new FormData(editForm).get("title").trim()
+
+      if (newTitle !== "" && newTitle !== this.#title) {
+        this.#title = newTitle
+        label.innerText = this.#title
+
+        this.#element.dispatchEvent(
+          new CustomEvent("edit", { bubbles: true })
+        )
+      }
+
+      editForm.setAttribute("hidden", "")
+      label.removeAttribute("hidden")
+      editBtn.disabled = false
     })
   }
 
@@ -112,24 +131,6 @@ class TodoListItem {
     const input = editForm.querySelector("input")
     input.focus()
     input.value = this.#title
-
-    editForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-      const newTitle = new FormData(editForm).get("title").trim()
-
-      if (newTitle !== "") {
-        this.#title = newTitle
-        label.innerText = this.#title
-
-        this.#element.dispatchEvent(
-          new CustomEvent("edit", { bubbles: true })
-        )
-      }
-
-      editForm.setAttribute("hidden", "")
-      label.removeAttribute("hidden")
-      editBtn.disabled = false
-    })
   }
 
   toJSON() {
