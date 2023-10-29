@@ -10,3 +10,7 @@ export function createElement(tagName, attributes = {}) {
   }
   return element
 }
+
+export function cloneTemplate() {
+  return
+}

@@ -9,135 +9,115 @@ class TodoListItem {
   /**
    * @type {HTMLLIElement}
    */
-  #element
+  element
   /**
    * @type {string}
    */
-  #title
+  title
   /**
    * @type {number}
    */
-  #id
+  id
   /**
    * @type {boolean}
    */
-  #completed
+  completed
 
   /**
    * @param {Todo} task
    */
   constructor(task) {
-    this.#completed = task.completed
-    this.#title = task.title
-    this.#id = task.id
+    this.completed = task.completed
+    this.title = task.title
+    this.id = task.id
+    this.element = document.querySelector("#todolist-item").content.cloneNode(true).firstElementChild
 
-    const todoItemTemplate = document.getElementById("todolist-item").content.cloneNode(true)
-    this.#element = todoItemTemplate.firstElementChild
+    const checkbox = this.element.querySelector(".todo-check")
+    const label = this.element.querySelector(".todo-title")
+    const editButton = this.element.querySelector(".todo-edit")
+    const removeButton = this.element.querySelector(".todo-remove")
+    const editForm = this.element.querySelector("form")
 
-    const checkbox = this.#element.querySelector("input[type=checkbox]")
-    checkbox.setAttribute("id", `todo-${this.#id}`)
-    if (this.#completed) {
+    checkbox.id = `todo-${this.id}`
+    if (this.completed) {
       checkbox.checked = true
-      this.#element.classList.add("is-completed")
+      this.element.classList.add("is-completed")
     }
-    const label = this.#element.querySelector("label")
-    label.setAttribute("for", `todo-${this.#id}`)
-    label.innerText = this.#title
+    label.htmlFor = `todo-${this.id}`
+    label.innerText = this.title
 
-    const editBtn = this.#element.querySelector(".todo-edit")
-    editBtn.addEventListener("click", (e) => {
-      e.preventDefault()
-      this.edit(e)
-    })
-    this.#element.querySelector(".todo-remove").addEventListener("click", (e) => {
-      e.preventDefault()
-      this.remove()
-    })
-    checkbox.addEventListener("change", (e) => {
-      e.preventDefault()
-      this.toggle()
-    })
-    const editForm = this.#element.querySelector("form")
+    checkbox.addEventListener("change", (e) => { this.toggle(e) })
+    editButton.addEventListener("click", (e) => { this.edit(e) })
+    removeButton.addEventListener("click", () => { this.remove() })
     editForm.addEventListener("submit", (e) => {
       e.preventDefault()
-      const newTitle = new FormData(editForm).get("title").trim()
+      const newTitle = new FormData(editForm).get("newTitle").trim()
 
-      if (newTitle !== "" && newTitle !== this.#title) {
-        this.#title = newTitle
-        label.innerText = this.#title
+      if (newTitle !== "" && newTitle !== this.title) {
+        this.title = newTitle
+        label.innerText = this.title
 
-        this.#element.dispatchEvent(
-          new CustomEvent("edit", { bubbles: true })
-        )
+        this.element.dispatchEvent(new CustomEvent("edit", { bubbles: true }))
       }
 
-      editForm.setAttribute("hidden", "")
-      label.removeAttribute("hidden")
-      editBtn.disabled = false
+      editForm.hidden = true
+      label.hidden = false
+      editButton.disabled = false
     })
-  }
-
-  get element() {
-    return this.#element
-  }
-
-  get title() {
-    return this.#title
-  }
-
-  get id() {
-    return this.#id
-  }
-
-  get completed() {
-    return this.#completed
   }
 
   /**
    * Remove current TodoListItem from the DOM
    */
   remove() {
-    this.#element.dispatchEvent(
+    this.element.dispatchEvent(
       new CustomEvent("delete", { detail: this, bubbles: true })
     )
-    this.#element.remove()
+    this.element.remove()
   }
 
-  toggle() {
-    const checkbox = this.#element.querySelector("input[type=checkbox]")
-    this.#completed = !this.#completed
-    checkbox.checked = this.#completed
+  /**
+   * Toggles the state of the current TodoListItem
+   * @param {Event} e
+   */
+  toggle(e) {
+    e.preventDefault()
+    const checkbox = e.currentTarget
+    this.completed = !this.completed
+    checkbox.checked = this.completed
 
     if (checkbox.checked) {
-      this.#element.classList.add("is-completed")
+      this.element.classList.add("is-completed")
     } else {
-      this.#element.classList.remove("is-completed")
+      this.element.classList.remove("is-completed")
     }
-    this.#element.dispatchEvent(
-      new CustomEvent("toggle", { bubbles: true })
-    )
+    this.element.dispatchEvent(new CustomEvent("toggle", { bubbles: true }))
   }
 
+  /**
+   * Edits the title of the current TodoListItem
+   * @param {PointerEvent} e
+   */
   edit(e) {
+    e.preventDefault()
     const editBtn = e.currentTarget
-    editBtn.disabled = true
-
-    const label = this.#element.querySelector("label")
-    label.setAttribute("hidden", "")
-
-    const editForm = this.#element.querySelector("form")
-    editForm.removeAttribute("hidden")
-
+    const label = this.element.querySelector(".todo-title")
+    const editForm = this.element.querySelector("form")
     const input = editForm.querySelector("input")
+
+    editBtn.disabled = true
+    label.hidden = true
+    editForm.hidden = false
+
     input.focus()
-    input.value = this.#title
+    input.value = this.title
   }
 
   toJSON() {
     return {
-      title: this.#title,
-      id: this.#id,
-      completed: this.#completed
+      title: this.title,
+      id: this.id,
+      completed: this.completed
     }
   }
 }
@@ -146,114 +126,117 @@ export class TodoList {
   /**
    * @type {HTMLElement}
    */
-  #element
+  element
   /**
    * @type {HTMLULElement}
    */
-  #listElement
+  listElement
   /**
    * @type {TodoListItem[]}
    */
-  #todolist = []
+  todoData = []
 
   /**
    * @param {Todo[]} taskList
    */
   constructor(taskList) {
-    const todoListTemplate = document.getElementById("todolist-layout").content.cloneNode(true)
-    this.#element = todoListTemplate.firstElementChild
-    this.#listElement = this.#element.querySelector(".list-group")
+    this.element = document.querySelector("#todolist-layout").content.cloneNode(true).firstElementChild
+    this.listElement = this.element.querySelector(".list-group")
 
     for (let task of taskList) {
       const todolistItem = new TodoListItem(task)
-      this.#todolist.push(todolistItem)
-      this.#listElement.append(todolistItem.element)
+      this.todoData.push(todolistItem)
+      this.listElement.append(todolistItem.element)
     }
+    this.updateLocalStorage()
 
-    this.#element.querySelectorAll(".btn-filter")
-      .forEach((button) => {
-        button.addEventListener("click", (e) => this.#toggleFilter(e))
-      })
+    const filterButtons = this.element.querySelectorAll(".btn-filter")
+    const clearButton = this.element.querySelector(".btn-clear")
+    const newTaskForm = this.element.querySelector("form")
 
-    this.#element.querySelector(".btn-clear")
-      .addEventListener("click", () => this.clearCompleted())
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", (e) => this.toggleFilter(e))
+    })
+    clearButton.addEventListener("click", (e) => this.removeCompleted(e))
+    newTaskForm.addEventListener("submit", (e) => this.addTask(e))
 
-    this.#element.querySelector("form")
-      .addEventListener("submit", (e) => this.#onSubmit(e))
-
-    this.#listElement
-      .addEventListener("delete", ({ detail: deletedTask }) => {
-        this.#todolist = this.#todolist.filter(task => task !== deletedTask)
-        this.#onUpdate()
-      })
-
-    this.#listElement.addEventListener("toggle", () => this.#onUpdate())
-    this.#listElement.addEventListener("edit", () => this.#onUpdate())
-  }
-
-  get element() {
-    return this.#element
-  }
-
-  get listElement() {
-    return this.#listElement
+    this.listElement.addEventListener("delete", ({ detail: deletedTask }) => {
+      this.todoData = this.todoData.filter(task => task !== deletedTask)
+      this.updateLocalStorage()
+    })
+    this.listElement.addEventListener("toggle", () => this.updateLocalStorage())
+    this.listElement.addEventListener("edit", () => this.updateLocalStorage())
   }
 
   /**
+   * Toggle the classes on the filters and the todolist element
    * @param {PointerEvent} e
    */
-  #toggleFilter(e) {
+  toggleFilter(e) {
     e.preventDefault()
     e.currentTarget.parentElement.querySelector(".active").classList.remove("active")
     e.currentTarget.classList.add("active")
 
     const filter = e.currentTarget.getAttribute("data-filter")
-    if (filter === "todo") {
-      this.#listElement.classList.add("hide-completed")
-      this.#listElement.classList.remove("hide-todo")
-    } else if (filter === "done") {
-      this.#listElement.classList.add("hide-todo")
-      this.#listElement.classList.remove("hide-completed")
-    } else {
-      this.#listElement.classList.remove("hide-todo")
-      this.#listElement.classList.remove("hide-completed")
+    switch (filter) {
+      case "todo":
+        this.listElement.classList.add("hide-completed")
+        this.listElement.classList.remove("hide-todo")
+        break
+      case "done":
+        this.listElement.classList.add("hide-todo")
+        this.listElement.classList.remove("hide-completed")
+        break
+      default:
+        this.listElement.classList.remove("hide-todo")
+        this.listElement.classList.remove("hide-completed")
+        break
     }
   }
 
   /**
+   * Creates and add a new task from the form
    * @param {SubmitEvent} e
    */
-  #onSubmit(e) {
+  addTask(e) {
     e.preventDefault()
-    const form = e.currentTarget
-    const taskName = new FormData(form).get("title").trim()
+    const addTaskForm = e.currentTarget
+    const taskName = new FormData(addTaskForm).get("title").trim()
     if (taskName === "") {
-      return form.reset()
+      return addTaskForm.reset()
     }
-    const todolistItem = new TodoListItem({
+    const task = new TodoListItem({
       id: Date.now(),
       title: taskName,
       completed: false
     })
-    this.#todolist.unshift(todolistItem)
-    this.#listElement.prepend(todolistItem.element)
-    this.#onUpdate()
-    form.reset()
+    this.todoData.unshift(task)
+    this.listElement.prepend(task.element)
+    this.updateLocalStorage()
+    addTaskForm.reset()
   }
 
-  #onUpdate() {
-    localStorage.setItem("todolist", JSON.stringify(this.#todolist))
+  updateLocalStorage() {
+    localStorage.setItem("todolist", JSON.stringify(this.todoData))
   }
 
-  clearCompleted() {
+  /**
+   * Remove all completed task from the DOM
+   *
+   * NEED FIX :
+   * Calling the 'remove()' method multiple times causes the 'UpdateLocalStorage()'
+   * method to repeatedly execute n times (where n is the number of items to remove),
+   * which is not necessary.
+   */
+  removeCompleted() {
     const message = "Do you want to delete all COMPLETED tasks ?"
     if (confirm(message)) {
-      this.#todolist.forEach((todolistItem) => {
+      this.todoData.forEach((todolistItem) => {
         if (todolistItem.completed) {
           todolistItem.remove()
         }
       })
-      this.#todolist = this.#todolist.filter((todolistItem) => !todolistItem.completed)
+      this.todoData = this.todoData.filter((todolistItem) => !todolistItem.completed)
     }
   }
 }

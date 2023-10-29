@@ -73,11 +73,11 @@
 
   <template id="todolist-item">
     <li class="todo list-group-item d-flex align-items-center">
-      <input class="form-check-input flex-shrink-0 mt-0" type="checkbox">
-      <label class="form-check-label ms-2 flex-grow-1"></label>
+      <input class="todo-check form-check-input flex-shrink-0 mt-0" type="checkbox">
+      <label class="todo-title form-check-label ms-2 flex-grow-1"></label>
 
       <form class="ms-2 flex-grow-1" hidden>
-        <input type="text" class="form-control form-control-sm" name="title">
+        <input type="text" class="form-control form-control-sm" name="newTitle">
       </form>
 
       <div class="btn-group ms-2">

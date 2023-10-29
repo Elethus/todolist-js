@@ -9,7 +9,7 @@ try {
 
   const todoData = (localStorage.getItem("todolist"))
     ? JSON.parse(localStorage.getItem("todolist").toString())
-    : await fetchJSON("https://jsonplaceholder.typicode.com/todos?_limit=10&_delay=1500") // added a delay to see the loader
+    : await fetchJSON("https://jsonplaceholder.typicode.com/todos?_limit=10&_delay=5000") // added a delay to see the loader
 
   const todoList = new TodoList(todoData)
   document.body.prepend(todoList.element)
